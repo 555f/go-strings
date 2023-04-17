@@ -93,12 +93,12 @@ func SplitUUID(s, sep string) (result []uuid.UUID, err error) {
 	return
 }
 
-func JoinInt[V constraints.Integer](values []V, sep string) (result string) {
+func JoinInt[V constraints.Integer](values []V, sep string, base int) (result string) {
 	for i, v := range values {
 		if i > 0 {
 			result += sep
 		}
-		result += strconv.FormatInt(int64(v), 10)
+		result += strconv.FormatInt(int64(v), base)
 	}
 	return
 }
