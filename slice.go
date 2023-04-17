@@ -102,3 +102,13 @@ func JoinInt[V constraints.Integer](values []V, sep string, base int) (result st
 	}
 	return
 }
+
+func JoinFloat[V constraints.Float](values []V, sep string, fmt byte, prec int, bitSize int) (result string) {
+	for i, v := range values {
+		if i > 0 {
+			result += sep
+		}
+		result += strconv.FormatFloat(float64(v), fmt, prec, bitSize)
+	}
+	return
+}
