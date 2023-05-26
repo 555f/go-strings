@@ -12,6 +12,9 @@ import (
 )
 
 func SplitKeyValInt[V constraints.Signed](s, sep, sepKV string, base, bitSize int) (result map[string]V, err error) {
+	if s == "" {
+		return map[string]V{}, nil
+	}
 	parts := strings.Split(s, sep)
 	result = make(map[string]V, len(parts))
 	for _, v := range parts {
@@ -29,6 +32,9 @@ func SplitKeyValInt[V constraints.Signed](s, sep, sepKV string, base, bitSize in
 }
 
 func SplitKeyValUint[V constraints.Unsigned](s, sep, sepKV string, base, bitSize int) (result map[string]V, err error) {
+	if s == "" {
+		return map[string]V{}, nil
+	}
 	parts := strings.Split(s, sep)
 	result = make(map[string]V, len(parts))
 	for _, v := range parts {
@@ -46,6 +52,9 @@ func SplitKeyValUint[V constraints.Unsigned](s, sep, sepKV string, base, bitSize
 }
 
 func SplitKeyValFloat[V constraints.Float](s, sep, sepKV string, bitSize int) (result map[string]V, err error) {
+	if s == "" {
+		return map[string]V{}, nil
+	}
 	parts := strings.Split(s, sep)
 	result = make(map[string]V, len(parts))
 	for _, v := range parts {
@@ -63,6 +72,9 @@ func SplitKeyValFloat[V constraints.Float](s, sep, sepKV string, bitSize int) (r
 }
 
 func SplitKeyValString[V ~string](s, sep, sepKV string) (result map[string]V, err error) {
+	if s == "" {
+		return map[string]V{}, nil
+	}
 	parts := strings.Split(s, sep)
 	result = make(map[string]V, len(parts))
 	for _, v := range parts {
@@ -76,6 +88,9 @@ func SplitKeyValString[V ~string](s, sep, sepKV string) (result map[string]V, er
 }
 
 func SplitKeyValTime[V time.Time](s, sep, sepKV, layout string) (result map[string]V, err error) {
+	if s == "" {
+		return map[string]V{}, nil
+	}
 	parts := strings.Split(s, sep)
 	result = make(map[string]V, len(parts))
 	for _, v := range parts {
@@ -93,6 +108,9 @@ func SplitKeyValTime[V time.Time](s, sep, sepKV, layout string) (result map[stri
 }
 
 func SplitKeyValDuration[V time.Duration](s, sep, sepKV string) (result map[string]V, err error) {
+	if s == "" {
+		return map[string]V{}, nil
+	}
 	parts := strings.Split(s, sep)
 	result = make(map[string]V, len(parts))
 	for _, v := range parts {
@@ -110,6 +128,9 @@ func SplitKeyValDuration[V time.Duration](s, sep, sepKV string) (result map[stri
 }
 
 func SplitKeyValUUID[V uuid.UUID](s, sep, sepKV string) (result map[string]V, err error) {
+	if s == "" {
+		return map[string]V{}, nil
+	}
 	parts := strings.Split(s, sep)
 	result = make(map[string]V, len(parts))
 	for _, v := range parts {

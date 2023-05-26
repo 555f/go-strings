@@ -12,10 +12,16 @@ import (
 )
 
 func Split(s, sep string) (result []string, err error) {
+	if s == "" {
+		return nil, nil
+	}
 	return strings.Split(s, sep), nil
 }
 
 func SplitInt[V constraints.Signed](s, sep string, base, bitSize int) (result []V, err error) {
+	if s == "" {
+		return nil, nil
+	}
 	parts := strings.Split(s, sep)
 	result = make([]V, len(parts))
 	for idx, v := range parts {
@@ -29,6 +35,9 @@ func SplitInt[V constraints.Signed](s, sep string, base, bitSize int) (result []
 }
 
 func SplitUint[V constraints.Unsigned](s, sep string, base, bitSize int) (result []V, err error) {
+	if s == "" {
+		return nil, nil
+	}
 	parts := strings.Split(s, sep)
 	result = make([]V, len(parts))
 	for idx, v := range parts {
@@ -42,6 +51,9 @@ func SplitUint[V constraints.Unsigned](s, sep string, base, bitSize int) (result
 }
 
 func SplitFloat[V constraints.Float](s, sep string, bitSize int) (result []V, err error) {
+	if s == "" {
+		return nil, nil
+	}
 	parts := strings.Split(s, sep)
 	result = make([]V, len(parts))
 	for idx, v := range parts {
@@ -55,6 +67,9 @@ func SplitFloat[V constraints.Float](s, sep string, bitSize int) (result []V, er
 }
 
 func SplitTime(s, sep, sepKV, layout string) (result []time.Time, err error) {
+	if s == "" {
+		return nil, nil
+	}
 	parts := strings.Split(s, sep)
 	result = make([]time.Time, len(parts))
 	for idx, v := range parts {
@@ -68,6 +83,9 @@ func SplitTime(s, sep, sepKV, layout string) (result []time.Time, err error) {
 }
 
 func SplitDuration(s, sep string) (result []time.Duration, err error) {
+	if s == "" {
+		return nil, nil
+	}
 	parts := strings.Split(s, sep)
 	result = make([]time.Duration, len(parts))
 	for idx, v := range parts {
@@ -81,6 +99,9 @@ func SplitDuration(s, sep string) (result []time.Duration, err error) {
 }
 
 func SplitUUID(s, sep string) (result []uuid.UUID, err error) {
+	if s == "" {
+		return nil, nil
+	}
 	parts := strings.Split(s, sep)
 	result = make([]uuid.UUID, len(parts))
 	for idx, v := range parts {
