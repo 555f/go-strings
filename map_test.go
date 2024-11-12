@@ -5,6 +5,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/google/uuid"
 	"golang.org/x/exp/constraints"
 )
 
@@ -164,6 +165,50 @@ func TestSplitKeyValInt(t *testing.T) {
 	}
 }
 
+func TestSplitKeyValUint(t *testing.T) {
+	type args struct {
+		s       string
+		sep     string
+		sepKV   string
+		base    int
+		bitSize int
+	}
+	tests := []struct {
+		name       string
+		args       args
+		wantResult map[string]uint
+		wantErr    bool
+	}{
+		{
+			name: "split uint",
+			args: args{
+				s:       "a=2;b=8",
+				sep:     ";",
+				sepKV:   "=",
+				base:    10,
+				bitSize: 64,
+			},
+			wantResult: map[string]uint{
+				"a": 2,
+				"b": 8,
+			},
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			gotResult, err := SplitKeyValUint[uint](tt.args.s, tt.args.sep, tt.args.sepKV, tt.args.base, tt.args.bitSize)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("SplitKeyValUint() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(gotResult, tt.wantResult) {
+				t.Errorf("SplitKeyValUint() = %v, want %v", gotResult, tt.wantResult)
+			}
+		})
+	}
+}
+
 func TestSplitKeyValFloat32(t *testing.T) {
 	type args struct {
 		s string
@@ -211,6 +256,46 @@ func TestSplitKeyValFloat32(t *testing.T) {
 			}
 			if !reflect.DeepEqual(gotResult, tt.wantResult) {
 				t.Errorf("SplitKeyValFloat() gotResult = %v, want %v", gotResult, tt.wantResult)
+			}
+		})
+	}
+}
+
+func TestSplitKeyValUUID(t *testing.T) {
+	type args struct {
+		s     string
+		sep   string
+		sepKV string
+	}
+	tests := []struct {
+		name       string
+		args       args
+		wantResult map[string]uuid.UUID
+		wantErr    bool
+	}{
+		{
+			name: "split uuid",
+			args: args{
+				s:     "a=A2A6F5B4-88E7-40CB-90B9-07625007A907;b=E606C4F8-5A57-415D-83B9-B358C886557F",
+				sep:   ";",
+				sepKV: "=",
+			},
+			wantResult: map[string]uuid.UUID{
+				"a": uuid.MustParse("A2A6F5B4-88E7-40CB-90B9-07625007A907"),
+				"b": uuid.MustParse("E606C4F8-5A57-415D-83B9-B358C886557F"),
+			},
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			gotResult, err := SplitKeyValUUID(tt.args.s, tt.args.sep, tt.args.sepKV)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("SplitKeyValUUID() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(gotResult, tt.wantResult) {
+				t.Errorf("SplitKeyValUUID() = %v, want %v", gotResult, tt.wantResult)
 			}
 		})
 	}
@@ -322,9 +407,276 @@ func TestSplitKeyValDuration(t *testing.T) {
 	}
 }
 
+func TestSplitKeyValString(t *testing.T) {
+	type args struct {
+		s     string
+		sep   string
+		sepKV string
+	}
+	tests := []struct {
+		name       string
+		args       args
+		wantResult map[string]string
+		wantErr    bool
+	}{
+		{
+			name: "split string",
+			args: args{
+				s:     "a=test;b=bar",
+				sep:   ";",
+				sepKV: "=",
+			},
+			wantResult: map[string]string{
+				"a": "test",
+				"b": "bar",
+			},
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			gotResult, err := SplitKeyValString[string](tt.args.s, tt.args.sep, tt.args.sepKV)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("SplitKeyValString() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(gotResult, tt.wantResult) {
+				t.Errorf("SplitKeyValString() = %v, want %v", gotResult, tt.wantResult)
+			}
+		})
+	}
+}
+
 func mustParseDuration(d time.Duration, err error) time.Duration {
 	if err != nil {
 		panic(err)
 	}
 	return d
+}
+
+func TestJoinKeyValInt(t *testing.T) {
+	type args struct {
+		values map[string]int
+		sep    string
+		sepKV  string
+		base   int
+	}
+	tests := []struct {
+		name       string
+		args       args
+		wantResult string
+	}{
+		{
+			name: "join int",
+			args: args{
+				values: map[string]int{"a": 100, "b": 500, "c": 1000, "d": -100},
+				sep:    ";",
+				sepKV:  "=",
+				base:   10,
+			},
+			wantResult: "a=100;b=500;c=1000;d=-100",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if gotResult := JoinKeyValInt(tt.args.values, tt.args.sep, tt.args.sepKV, tt.args.base); gotResult != tt.wantResult {
+				t.Errorf("JoinKeyValInt() = %v, want %v", gotResult, tt.wantResult)
+			}
+		})
+	}
+}
+
+func TestJoinKeyValUint(t *testing.T) {
+	type args struct {
+		values map[string]uint
+		sep    string
+		sepKV  string
+		base   int
+	}
+	tests := []struct {
+		name       string
+		args       args
+		wantResult string
+	}{
+		{
+			name: "join uint",
+			args: args{
+				values: map[string]uint{"a": 1, "b": 200},
+				sep:    ";",
+				sepKV:  "=",
+				base:   10,
+			},
+			wantResult: "a=1;b=200",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if gotResult := JoinKeyValUint(tt.args.values, tt.args.sep, tt.args.sepKV, tt.args.base); gotResult != tt.wantResult {
+				t.Errorf("JoinKeyValUint() = %v, want %v", gotResult, tt.wantResult)
+			}
+		})
+	}
+}
+
+func TestJoinKeyValFloat(t *testing.T) {
+	type args struct {
+		values  map[string]float32
+		sep     string
+		sepKV   string
+		fmt     byte
+		prec    int
+		bitSize int
+	}
+	tests := []struct {
+		name       string
+		args       args
+		wantResult string
+	}{
+		{
+			name: "join float32",
+			args: args{
+				values:  map[string]float32{"a": 34.523, "b": 69.4},
+				sep:     ";",
+				sepKV:   "=",
+				fmt:     'f',
+				prec:    2,
+				bitSize: 64,
+			},
+			wantResult: "a=34.52;b=69.40",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if gotResult := JoinKeyValFloat(tt.args.values, tt.args.sep, tt.args.sepKV, tt.args.fmt, tt.args.prec, tt.args.bitSize); gotResult != tt.wantResult {
+				t.Errorf("JoinKeyValFloat() = %v, want %v", gotResult, tt.wantResult)
+			}
+		})
+	}
+}
+
+func TestJoinKeyValString(t *testing.T) {
+	type args struct {
+		values map[string]string
+		sep    string
+		sepKV  string
+	}
+	tests := []struct {
+		name       string
+		args       args
+		wantResult string
+	}{
+		{
+			name: "join string",
+			args: args{
+				values: map[string]string{"a": "test string", "b": "bar"},
+				sep:    ";",
+				sepKV:  "=",
+			},
+			wantResult: "a=test string;b=bar",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if gotResult := JoinKeyValString(tt.args.values, tt.args.sep, tt.args.sepKV); gotResult != tt.wantResult {
+				t.Errorf("JoinKeyValString() = %v, want %v", gotResult, tt.wantResult)
+			}
+		})
+	}
+}
+
+func TestJoinKeyValTime(t *testing.T) {
+	type args struct {
+		values map[string]time.Time
+		sep    string
+		sepKV  string
+		layout string
+	}
+	tests := []struct {
+		name       string
+		args       args
+		wantResult string
+	}{
+		{
+			name: "join time",
+			args: args{
+				values: map[string]time.Time{
+					"a": time.Date(1985, time.April, 2, 0, 0, 0, 0, time.UTC),
+					"b": time.Date(1985, time.April, 2, 14, 59, 0, 0, time.UTC),
+				},
+				sep:    ";",
+				sepKV:  "=",
+				layout: time.RFC3339,
+			},
+			wantResult: "a=1985-04-02T00:00:00Z;b=1985-04-02T14:59:00Z",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if gotResult := JoinKeyValTime(tt.args.values, tt.args.sep, tt.args.sepKV, tt.args.layout); gotResult != tt.wantResult {
+				t.Errorf("JoinKeyValTime() = %v, want %v", gotResult, tt.wantResult)
+			}
+		})
+	}
+}
+
+func TestJoinKeyValDuration(t *testing.T) {
+	type args struct {
+		values map[string]time.Duration
+		sep    string
+		sepKV  string
+	}
+	tests := []struct {
+		name       string
+		args       args
+		wantResult string
+	}{
+		{
+			name: "join duration",
+			args: args{
+				values: map[string]time.Duration{"a": time.Minute * 5, "b": time.Second * 3920},
+				sep:    ";",
+				sepKV:  "=",
+			},
+			wantResult: "a=5m0s;b=1h5m20s",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if gotResult := JoinKeyValDuration(tt.args.values, tt.args.sep, tt.args.sepKV); gotResult != tt.wantResult {
+				t.Errorf("JoinKeyValDuration() = %v, want %v", gotResult, tt.wantResult)
+			}
+		})
+	}
+}
+
+func TestJoinKeyValUUID(t *testing.T) {
+	uuidTestA := uuid.Must(uuid.NewRandom())
+	uuidTestB := uuid.Must(uuid.NewRandom())
+	type args struct {
+		values map[string]uuid.UUID
+		sep    string
+		sepKV  string
+	}
+	tests := []struct {
+		name       string
+		args       args
+		wantResult string
+	}{
+		{
+			name: "join uuid",
+			args: args{
+				values: map[string]uuid.UUID{"a": uuidTestA, "b": uuidTestB},
+				sep:    ";",
+				sepKV:  "=",
+			},
+			wantResult: "a=" + uuidTestA.String() + ";b=" + uuidTestB.String(),
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if gotResult := JoinKeyValUUID(tt.args.values, tt.args.sep, tt.args.sepKV); gotResult != tt.wantResult {
+				t.Errorf("JoinKeyValUUID() = %v, want %v", gotResult, tt.wantResult)
+			}
+		})
+	}
 }
