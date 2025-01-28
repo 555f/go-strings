@@ -1,6 +1,7 @@
 package gostrings
 
 import (
+	"net/url"
 	"strconv"
 	"time"
 
@@ -80,6 +81,17 @@ func ParseDuration(s string, out *time.Duration) error {
 	}
 
 	*out = t
+
+	return nil
+}
+
+func ParseURL(s string, out **url.URL) error {
+	u, err := url.Parse(s)
+	if err != nil {
+		return err
+	}
+
+	*out = u
 
 	return nil
 }

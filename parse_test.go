@@ -1,6 +1,7 @@
 package gostrings
 
 import (
+	"net/url"
 	"testing"
 	"time"
 
@@ -257,7 +258,7 @@ func TestParseTime(t *testing.T) {
 				t.Errorf("ParseTime() error = %v, wantErr %v", err, tt.wantErr)
 			}
 			if got != tt.want {
-				t.Errorf("ParseFloat() got = %v, want %v", got, tt.want)
+				t.Errorf("ParseTime() got = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -294,10 +295,50 @@ func TestParseDuration(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			var got time.Duration
 			if err := ParseDuration(tt.args.s, &got); (err != nil) != tt.wantErr {
-				t.Errorf("ParseTime() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("ParseDuration() error = %v, wantErr %v", err, tt.wantErr)
 			}
 			if got != tt.want {
-				t.Errorf("ParseFloat() got = %v, want %v", got, tt.want)
+				t.Errorf("ParseDuration() got = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestParseURL(t *testing.T) {
+	type args struct {
+		s string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    *url.URL
+		wantErr bool
+	}{
+		{
+			name: "parse URL success",
+			args: args{
+				s: "http://555f.ru",
+			},
+			want:    must(url.Parse("http://555f.ru")),
+			wantErr: false,
+		},
+		{
+			name: "parse URL error",
+			args: args{
+				s: string([]byte{0x7f}),
+			},
+			want:    nil,
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var got *url.URL
+			if err := ParseURL(tt.args.s, &got); (err != nil) != tt.wantErr {
+				t.Errorf("ParseURL() error = %v, wantErr %v", err, tt.wantErr)
+			}
+			if tt.want != nil && got.String() != tt.want.String() {
+				t.Errorf("ParseURL() got = %v, want %v", got, tt.want)
 			}
 		})
 	}
