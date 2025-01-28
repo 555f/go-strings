@@ -2,6 +2,7 @@ package gostrings
 
 import (
 	"testing"
+	"time"
 
 	"golang.org/x/exp/constraints"
 )
@@ -211,6 +212,89 @@ func TestParseComplex(t *testing.T) {
 			if (err != nil) != tt.wantErr {
 				t.Errorf("ParseInt() error = %v, wantErr %v", err, tt.wantErr)
 				return
+			}
+			if got != tt.want {
+				t.Errorf("ParseFloat() got = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestParseTime(t *testing.T) {
+	type args struct {
+		layout string
+		s      string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    time.Time
+		wantErr bool
+	}{
+		{
+			name: "passe time success",
+			args: args{
+				layout: time.RFC3339,
+				s:      "2025-01-02T15:04:05Z",
+			},
+			want:    must(time.Parse(time.RFC3339, "2025-01-02T15:04:05Z")),
+			wantErr: false,
+		},
+		{
+			name: "passe time error",
+			args: args{
+				layout: time.RFC3339,
+				s:      "2025-01-02T15:04:05",
+			},
+			want:    time.Time{},
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var got time.Time
+			if err := ParseTime(tt.args.layout, tt.args.s, &got); (err != nil) != tt.wantErr {
+				t.Errorf("ParseTime() error = %v, wantErr %v", err, tt.wantErr)
+			}
+			if got != tt.want {
+				t.Errorf("ParseFloat() got = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestParseDuration(t *testing.T) {
+	type args struct {
+		s string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    time.Duration
+		wantErr bool
+	}{
+		{
+			name: "passe duration success",
+			args: args{
+				s: "1h",
+			},
+			want:    must(time.ParseDuration("1h")),
+			wantErr: false,
+		},
+		{
+			name: "passe duration error",
+			args: args{
+				s: "a",
+			},
+			want:    0,
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var got time.Duration
+			if err := ParseDuration(tt.args.s, &got); (err != nil) != tt.wantErr {
+				t.Errorf("ParseTime() error = %v, wantErr %v", err, tt.wantErr)
 			}
 			if got != tt.want {
 				t.Errorf("ParseFloat() got = %v, want %v", got, tt.want)
