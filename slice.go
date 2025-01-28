@@ -6,111 +6,130 @@ import (
 	"strings"
 	"time"
 
-	"github.com/google/uuid"
-
 	"golang.org/x/exp/constraints"
 )
 
-func Split(s, sep string) (result []string, err error) {
+func Split(s, sep string, recv *[]string) (err error) {
 	if s == "" {
-		return nil, nil
+		return nil
 	}
-	return strings.Split(s, sep), nil
+	*recv = strings.Split(s, sep)
+	return nil
 }
 
-func SplitInt[V constraints.Signed](s, sep string, base, bitSize int) (result []V, err error) {
+func SplitInt[V constraints.Signed](s, sep string, base, bitSize int, out *[]V) (err error) {
 	if s == "" {
-		return nil, nil
+		return nil
 	}
 	parts := strings.Split(s, sep)
-	result = make([]V, len(parts))
+	resultOut := make([]V, len(parts))
 	for idx, v := range parts {
-		i, err := ParseInt[V](v, base, bitSize)
-		if err != nil {
-			return nil, err
+		var i V
+		if err := ParseInt[V](v, base, bitSize, &i); err != nil {
+			return fmt.Errorf("parsing error idx %d value %s: %w", idx, v, err)
 		}
-		result[idx] = i
+		resultOut[idx] = i
 	}
+
+	*out = resultOut
+
 	return
 }
 
-func SplitUint[V constraints.Unsigned](s, sep string, base, bitSize int) (result []V, err error) {
+func SplitUint[V constraints.Unsigned](s, sep string, base, bitSize int, out *[]V) (err error) {
 	if s == "" {
-		return nil, nil
+		return nil
 	}
 	parts := strings.Split(s, sep)
-	result = make([]V, len(parts))
+	resultOut := make([]V, len(parts))
 	for idx, v := range parts {
-		i, err := ParseUint[V](v, base, bitSize)
+		var i V
+		err := ParseUint[V](v, base, bitSize, &i)
 		if err != nil {
-			return nil, err
+			return fmt.Errorf("parsing error idx %d value %s: %w", idx, v, err)
 		}
-		result[idx] = i
+		resultOut[idx] = i
 	}
+
+	*out = resultOut
+
 	return
 }
 
-func SplitFloat[V constraints.Float](s, sep string, bitSize int) (result []V, err error) {
+func SplitFloat[V constraints.Float](s, sep string, bitSize int, out *[]V) (err error) {
 	if s == "" {
-		return nil, nil
+		return nil
 	}
 	parts := strings.Split(s, sep)
-	result = make([]V, len(parts))
+	resultOut := make([]V, len(parts))
 	for idx, v := range parts {
-		i, err := ParseFloat[V](v, bitSize)
+		var i V
+		err := ParseFloat[V](v, bitSize, &i)
 		if err != nil {
-			return nil, err
+			return fmt.Errorf("parsing error idx %d value %s: %w", idx, v, err)
 		}
-		result[idx] = i
+		resultOut[idx] = i
 	}
+
+	*out = resultOut
+
 	return
 }
 
-func SplitTime(s, sep, sepKV, layout string) (result []time.Time, err error) {
+func SplitTime(s, sep, sepKV, layout string, out *[]time.Time) (err error) {
 	if s == "" {
-		return nil, nil
+		return nil
 	}
 	parts := strings.Split(s, sep)
-	result = make([]time.Time, len(parts))
+	resultOut := make([]time.Time, len(parts))
 	for idx, v := range parts {
 		t, err := time.Parse(layout, v)
 		if err != nil {
-			return nil, fmt.Errorf("invalid date format for index %d: %w", idx, err)
+			return fmt.Errorf("invalid date format for idx %d value %s: %w", idx, v, err)
 		}
-		result[idx] = t
+		resultOut[idx] = t
 	}
+
+	*out = resultOut
+
 	return
 }
 
-func SplitDuration(s, sep string) (result []time.Duration, err error) {
+func SplitDuration(s, sep string, out *[]time.Duration) (err error) {
 	if s == "" {
-		return nil, nil
+		return nil
 	}
 	parts := strings.Split(s, sep)
-	result = make([]time.Duration, len(parts))
+	resultOut := make([]time.Duration, len(parts))
 	for idx, v := range parts {
 		t, err := time.ParseDuration(v)
 		if err != nil {
-			return nil, fmt.Errorf("invalid duration format for index %d: %w", idx, err)
+			return fmt.Errorf("invalid duration format for idx %d value %s: %w", idx, v, err)
 		}
-		result[idx] = t
+		resultOut[idx] = t
 	}
+
+	*out = resultOut
+
 	return
 }
 
-func SplitUUID(s, sep string) (result []uuid.UUID, err error) {
+func SplitUUID[T any](s, sep string, parseUUID UUIDParser[T], out *[]T) (err error) {
 	if s == "" {
-		return nil, nil
+		return nil
 	}
 	parts := strings.Split(s, sep)
-	result = make([]uuid.UUID, len(parts))
+	resultOut := make([]T, len(parts))
 	for idx, v := range parts {
-		t, err := uuid.Parse(v)
+		t, err := parseUUID(v)
 		if err != nil {
-			return nil, fmt.Errorf("invalid duration format for key %d: %w", idx, err)
+			return fmt.Errorf("invalid duration format for idx %d value %s: %w", idx, v, err)
 		}
-		result[idx] = t
+		resultOut[idx] = t
 	}
+
+	*out = resultOut
+
 	return
 }
 

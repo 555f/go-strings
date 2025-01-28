@@ -21,7 +21,31 @@ func TestSplitKeyValInt16(t *testing.T) {
 	}
 	tests := []testCase[int16]{
 		{
-			name: "test int16",
+			name: "split key/value int16 empty",
+			args: args{
+				s: "",
+			},
+			wantResult: map[string]int16{},
+			wantErr:    false,
+		},
+		{
+			name: "split key/value int16 parse error",
+			args: args{
+				s: "a=dvssdvsd",
+			},
+			wantResult: nil,
+			wantErr:    true,
+		},
+		{
+			name: "split key/value int16 format error",
+			args: args{
+				s: "a",
+			},
+			wantResult: nil,
+			wantErr:    true,
+		},
+		{
+			name: "split key/value int16",
 			args: args{
 				s: "a=12312;b=13312",
 			},
@@ -32,7 +56,7 @@ func TestSplitKeyValInt16(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name: "test int16 failed kv sep",
+			name: "split key/value int16 failed kv sep",
 			args: args{
 				s: "a=12312;b-13312",
 			},
@@ -40,7 +64,7 @@ func TestSplitKeyValInt16(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name: "test int16 failed item sep",
+			name: "split key/value int16 failed item sep",
 			args: args{
 				s: "a=12312,b=13312",
 			},
@@ -49,7 +73,8 @@ func TestSplitKeyValInt16(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotResult, err := SplitKeyValInt[int16](tt.args.s, ";", "=", 10, 64)
+			var gotResult map[string]int16
+			err := SplitKeyValInt[int16](tt.args.s, ";", "=", 10, 64, &gotResult)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("SplitKeyValInt() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -101,7 +126,8 @@ func TestSplitKeyValInt8(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotResult, err := SplitKeyValInt[int8](tt.args.s, ";", "=", 10, 64)
+			var gotResult map[string]int8
+			err := SplitKeyValInt[int8](tt.args.s, ";", "=", 10, 64, &gotResult)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("SplitKeyValInt() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -153,7 +179,8 @@ func TestSplitKeyValInt(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotResult, err := SplitKeyValInt[int](tt.args.s, ";", "=", 10, 64)
+			var gotResult map[string]int
+			err := SplitKeyValInt[int](tt.args.s, ";", "=", 10, 64, &gotResult)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("SplitKeyValInt() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -180,6 +207,37 @@ func TestSplitKeyValUint(t *testing.T) {
 		wantErr    bool
 	}{
 		{
+			name: "split key/value uint empty",
+			args: args{
+				s:     "",
+				sep:   ";",
+				sepKV: "=",
+			},
+
+			wantResult: map[string]uint{},
+			wantErr:    false,
+		},
+		{
+			name: "split key/value uint parse error",
+			args: args{
+				s:     "a=dvssdvsd",
+				sep:   ";",
+				sepKV: "=",
+			},
+			wantResult: nil,
+			wantErr:    true,
+		},
+		{
+			name: "split key/value uint format error",
+			args: args{
+				s:     "a",
+				sep:   ";",
+				sepKV: "=",
+			},
+			wantResult: nil,
+			wantErr:    true,
+		},
+		{
 			name: "split uint",
 			args: args{
 				s:       "a=2;b=8",
@@ -197,7 +255,8 @@ func TestSplitKeyValUint(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotResult, err := SplitKeyValUint[uint](tt.args.s, tt.args.sep, tt.args.sepKV, tt.args.base, tt.args.bitSize)
+			var gotResult map[string]uint
+			err := SplitKeyValUint[uint](tt.args.s, tt.args.sep, tt.args.sepKV, tt.args.base, tt.args.bitSize, &gotResult)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("SplitKeyValUint() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -220,6 +279,30 @@ func TestSplitKeyValFloat32(t *testing.T) {
 		wantErr    bool
 	}
 	tests := []testCase[float32]{
+		{
+			name: "split key/value float32 empty",
+			args: args{
+				s: "",
+			},
+			wantResult: map[string]float32{},
+			wantErr:    false,
+		},
+		{
+			name: "split key/value float32 parse error",
+			args: args{
+				s: "a=qwerty",
+			},
+			wantResult: nil,
+			wantErr:    true,
+		},
+		{
+			name: "split key/value float32 format error",
+			args: args{
+				s: "a",
+			},
+			wantResult: nil,
+			wantErr:    true,
+		},
 		{
 			name: "test int",
 			args: args{
@@ -249,7 +332,8 @@ func TestSplitKeyValFloat32(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotResult, err := SplitKeyValFloat[float32](tt.args.s, ";", "=", 64)
+			var gotResult map[string]float32
+			err := SplitKeyValFloat[float32](tt.args.s, ";", "=", 64, &gotResult)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("SplitKeyValFloat() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -274,22 +358,53 @@ func TestSplitKeyValUUID(t *testing.T) {
 		wantErr    bool
 	}{
 		{
-			name: "split uuid",
+			name: "split key/value uuid empty",
 			args: args{
-				s:     "a=A2A6F5B4-88E7-40CB-90B9-07625007A907;b=E606C4F8-5A57-415D-83B9-B358C886557F",
+				s:     "",
+				sep:   ";",
+				sepKV: "=",
+			},
+			wantResult: map[string]uuid.UUID{},
+			wantErr:    false,
+		},
+		{
+			name: "split key/value uuid parse error",
+			args: args{
+				s:     "a=8F853762-D357-47DD-8331-C8084FA4FA6",
+				sep:   ";",
+				sepKV: "=",
+			},
+			wantResult: nil,
+			wantErr:    true,
+		},
+		{
+			name: "split key/value uuid format error",
+			args: args{
+				s:     "a",
+				sep:   ";",
+				sepKV: "=",
+			},
+			wantResult: nil,
+			wantErr:    true,
+		},
+		{
+			name: "split key/value uuid success",
+			args: args{
+				s:     "a=8F853762-D357-47DD-8331-C8084FA4FA6C;b=E606C4F8-5A57-415D-83B9-B358C886557F",
 				sep:   ";",
 				sepKV: "=",
 			},
 			wantResult: map[string]uuid.UUID{
-				"a": uuid.MustParse("A2A6F5B4-88E7-40CB-90B9-07625007A907"),
-				"b": uuid.MustParse("E606C4F8-5A57-415D-83B9-B358C886557F"),
+				"a": must(uuid.Parse("8F853762-D357-47DD-8331-C8084FA4FA6C")),
+				"b": must(uuid.Parse("E606C4F8-5A57-415D-83B9-B358C886557F")),
 			},
 			wantErr: false,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotResult, err := SplitKeyValUUID(tt.args.s, tt.args.sep, tt.args.sepKV)
+			var gotResult map[string]uuid.UUID
+			err := SplitKeyValUUID(tt.args.s, tt.args.sep, tt.args.sepKV, uuid.Parse, &gotResult)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("SplitKeyValUUID() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -314,7 +429,7 @@ func TestSplitKeyValTime(t *testing.T) {
 	}
 	tests := []testCase[time.Time]{
 		{
-			name: "test time",
+			name: "split key/value time success",
 			args: args{
 				s:      "a=2023-03-03T13:30:00Z;b=2023-03-03T13:30:01Z",
 				layout: time.RFC3339,
@@ -326,15 +441,22 @@ func TestSplitKeyValTime(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name: "test time failed kv sep",
+			name: "split key/value time empty",
+			args: args{
+				s: "",
+			},
+			wantResult: map[string]time.Time{},
+			wantErr:    false,
+		},
+		{
+			name: "split key/value time failed kv sep",
 			args: args{
 				s: "a=12312;b-13312",
 			},
-
 			wantErr: true,
 		},
 		{
-			name: "test time failed item sep",
+			name: "split key/value time failed item sep",
 			args: args{
 				s: "a=12312,b=13312",
 			},
@@ -343,7 +465,8 @@ func TestSplitKeyValTime(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotResult, err := SplitKeyValTime[time.Time](tt.args.s, ";", "=", tt.args.layout)
+			var gotResult map[string]time.Time
+			err := SplitKeyValTime[time.Time](tt.args.s, ";", "=", tt.args.layout, &gotResult)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("SplitKeyValTime() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -367,26 +490,33 @@ func TestSplitKeyValDuration(t *testing.T) {
 	}
 	tests := []testCase[time.Duration]{
 		{
-			name: "test time",
+			name: "split key/value duration success",
 			args: args{
 				s: "a=1h1m1s;b=2h2m2s",
 			},
 			wantResult: map[string]time.Duration{
-				"a": mustParseDuration(time.ParseDuration("1h1m1s")),
-				"b": mustParseDuration(time.ParseDuration("2h2m2s")),
+				"a": must(time.ParseDuration("1h1m1s")),
+				"b": must(time.ParseDuration("2h2m2s")),
 			},
 			wantErr: false,
 		},
 		{
-			name: "test time failed kv sep",
+			name: "split key/value duration empty",
+			args: args{
+				s: "",
+			},
+			wantResult: map[string]time.Duration{},
+			wantErr:    false,
+		},
+		{
+			name: "split key/value duration failed kv sep",
 			args: args{
 				s: "a=12312;b-13312",
 			},
-
 			wantErr: true,
 		},
 		{
-			name: "test time failed item sep",
+			name: "split key/value duration failed item sep",
 			args: args{
 				s: "a=12312,b=13312",
 			},
@@ -395,7 +525,8 @@ func TestSplitKeyValDuration(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotResult, err := SplitKeyValDuration[time.Duration](tt.args.s, ";", "=")
+			var gotResult map[string]time.Duration
+			err := SplitKeyValDuration[time.Duration](tt.args.s, ";", "=", &gotResult)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("TestSplitKeyValDuration() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -420,7 +551,27 @@ func TestSplitKeyValString(t *testing.T) {
 		wantErr    bool
 	}{
 		{
-			name: "split string",
+			name: "split key/value string empty",
+			args: args{
+				s:     "",
+				sep:   ";",
+				sepKV: "=",
+			},
+			wantResult: map[string]string{},
+			wantErr:    false,
+		},
+		{
+			name: "split key/value string format error",
+			args: args{
+				s:     "a",
+				sep:   ";",
+				sepKV: "=",
+			},
+			wantResult: nil,
+			wantErr:    true,
+		},
+		{
+			name: "split key/value string success",
 			args: args{
 				s:     "a=test;b=bar",
 				sep:   ";",
@@ -435,7 +586,8 @@ func TestSplitKeyValString(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotResult, err := SplitKeyValString[string](tt.args.s, tt.args.sep, tt.args.sepKV)
+			var gotResult map[string]string
+			err := SplitKeyValString[string](tt.args.s, tt.args.sep, tt.args.sepKV, &gotResult)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("SplitKeyValString() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -445,13 +597,6 @@ func TestSplitKeyValString(t *testing.T) {
 			}
 		})
 	}
-}
-
-func mustParseDuration(d time.Duration, err error) time.Duration {
-	if err != nil {
-		panic(err)
-	}
-	return d
 }
 
 func TestJoinKeyValInt(t *testing.T) {

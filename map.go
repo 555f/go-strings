@@ -12,139 +12,167 @@ import (
 	"golang.org/x/exp/constraints"
 )
 
-func SplitKeyValInt[V constraints.Signed](s, sep, sepKV string, base, bitSize int) (result map[string]V, err error) {
+func SplitKeyValInt[V constraints.Signed](s, sep, sepKV string, base, bitSize int, out *map[string]V) (err error) {
 	if s == "" {
-		return map[string]V{}, nil
+		*out = map[string]V{}
+		return nil
 	}
 	parts := strings.Split(s, sep)
-	result = make(map[string]V, len(parts))
+	resultOut := make(map[string]V, len(parts))
 	for _, v := range parts {
 		kv := strings.Split(v, sepKV)
 		if len(kv) != 2 {
-			return nil, errors.New("invalid string format, should be 'key" + sepKV + "val" + sep + "key" + sepKV + "val'")
+			return errors.New("invalid string format, should be 'key" + sepKV + "val" + sep + "key" + sepKV + "val'")
 		}
-		i, err := ParseInt[V](kv[1], base, bitSize)
-		if err != nil {
-			return nil, err
+		var i V
+		if err := ParseInt[V](kv[1], base, bitSize, &i); err != nil {
+			return err
 		}
-		result[kv[0]] = i
+		resultOut[kv[0]] = i
 	}
+
+	*out = resultOut
+
 	return
 }
 
-func SplitKeyValUint[V constraints.Unsigned](s, sep, sepKV string, base, bitSize int) (result map[string]V, err error) {
+func SplitKeyValUint[V constraints.Unsigned](s, sep, sepKV string, base, bitSize int, out *map[string]V) (err error) {
 	if s == "" {
-		return map[string]V{}, nil
+		*out = map[string]V{}
+		return nil
 	}
 	parts := strings.Split(s, sep)
-	result = make(map[string]V, len(parts))
+	resultOut := make(map[string]V, len(parts))
 	for _, v := range parts {
 		kv := strings.Split(v, sepKV)
 		if len(kv) != 2 {
-			return nil, errors.New("invalid string format, should be 'key" + sepKV + "val" + sep + "key" + sepKV + "val'")
+			return errors.New("invalid string format, should be 'key" + sepKV + "val" + sep + "key" + sepKV + "val'")
 		}
-		i, err := ParseUint[V](kv[1], base, bitSize)
-		if err != nil {
-			return nil, err
+		var i V
+		if err := ParseUint[V](kv[1], base, bitSize, &i); err != nil {
+			return err
 		}
-		result[kv[0]] = i
+		resultOut[kv[0]] = i
 	}
+
+	*out = resultOut
+
 	return
 }
 
-func SplitKeyValFloat[V constraints.Float](s, sep, sepKV string, bitSize int) (result map[string]V, err error) {
+func SplitKeyValFloat[V constraints.Float](s, sep, sepKV string, bitSize int, out *map[string]V) (err error) {
 	if s == "" {
-		return map[string]V{}, nil
+		*out = map[string]V{}
+		return nil
 	}
 	parts := strings.Split(s, sep)
-	result = make(map[string]V, len(parts))
+	resultOut := make(map[string]V, len(parts))
 	for _, v := range parts {
 		kv := strings.Split(v, sepKV)
 		if len(kv) != 2 {
-			return nil, errors.New("invalid string format, should be 'key" + sepKV + "val" + sep + "key" + sepKV + "val'")
+			return errors.New("invalid string format, should be 'key" + sepKV + "val" + sep + "key" + sepKV + "val'")
 		}
 		i, err := strconv.ParseFloat(kv[1], bitSize)
 		if err != nil {
-			return nil, err
+			return err
 		}
-		result[kv[0]] = V(i)
+		resultOut[kv[0]] = V(i)
 	}
+
+	*out = resultOut
+
 	return
 }
 
-func SplitKeyValString[V ~string](s, sep, sepKV string) (result map[string]V, err error) {
+func SplitKeyValString[V ~string](s, sep, sepKV string, out *map[string]V) (err error) {
 	if s == "" {
-		return map[string]V{}, nil
+		*out = map[string]V{}
+		return nil
 	}
 	parts := strings.Split(s, sep)
-	result = make(map[string]V, len(parts))
+	resultOut := make(map[string]V, len(parts))
 	for _, v := range parts {
 		kv := strings.Split(v, sepKV)
 		if len(kv) != 2 {
-			return nil, errors.New("invalid string format, should be 'key" + sepKV + "val" + sep + "key" + sepKV + "val'")
+			return errors.New("invalid string format, should be 'key" + sepKV + "val" + sep + "key" + sepKV + "val'")
 		}
-		result[kv[0]] = V(kv[1])
+		resultOut[kv[0]] = V(kv[1])
 	}
+
+	*out = resultOut
+
 	return
 }
 
-func SplitKeyValTime[V time.Time](s, sep, sepKV, layout string) (result map[string]V, err error) {
+func SplitKeyValTime[V time.Time](s, sep, sepKV, layout string, out *map[string]V) (err error) {
 	if s == "" {
-		return map[string]V{}, nil
+		*out = map[string]V{}
+		return nil
 	}
 	parts := strings.Split(s, sep)
-	result = make(map[string]V, len(parts))
+	resultOut := make(map[string]V, len(parts))
 	for _, v := range parts {
 		kv := strings.Split(v, sepKV)
 		if len(kv) != 2 {
-			return nil, errors.New("invalid string format, should be 'key" + sepKV + "val" + sep + "key" + sepKV + "val'")
+			return errors.New("invalid string format, should be 'key" + sepKV + "val" + sep + "key" + sepKV + "val'")
 		}
 		t, err := time.Parse(layout, kv[1])
 		if err != nil {
-			return nil, fmt.Errorf("invalid date format for key %s: %w", kv[0], err)
+			return fmt.Errorf("invalid date format for key %s: %w", kv[0], err)
 		}
-		result[kv[0]] = V(t)
+		resultOut[kv[0]] = V(t)
 	}
+
+	*out = resultOut
+
 	return
 }
 
-func SplitKeyValDuration[V time.Duration](s, sep, sepKV string) (result map[string]V, err error) {
+func SplitKeyValDuration[V time.Duration](s, sep, sepKV string, out *map[string]V) (err error) {
 	if s == "" {
-		return map[string]V{}, nil
+		*out = map[string]V{}
+		return nil
 	}
 	parts := strings.Split(s, sep)
-	result = make(map[string]V, len(parts))
+	resultOut := make(map[string]V, len(parts))
 	for _, v := range parts {
 		kv := strings.Split(v, sepKV)
 		if len(kv) != 2 {
-			return nil, errors.New("invalid string format, should be 'key" + sepKV + "val" + sep + "key" + sepKV + "val'")
+			return errors.New("invalid string format, should be 'key" + sepKV + "val" + sep + "key" + sepKV + "val'")
 		}
 		t, err := time.ParseDuration(kv[1])
 		if err != nil {
-			return nil, fmt.Errorf("invalid duration format for key %s: %w", kv[0], err)
+			return fmt.Errorf("invalid duration format for key %s: %w", kv[0], err)
 		}
-		result[kv[0]] = V(t)
+		resultOut[kv[0]] = V(t)
 	}
+
+	*out = resultOut
+
 	return
 }
 
-func SplitKeyValUUID[V uuid.UUID](s, sep, sepKV string) (result map[string]V, err error) {
+func SplitKeyValUUID[T any](s, sep, sepKV string, uuidParse UUIDParser[T], out *map[string]T) (err error) {
 	if s == "" {
-		return map[string]V{}, nil
+		*out = map[string]T{}
+		return nil
 	}
 	parts := strings.Split(s, sep)
-	result = make(map[string]V, len(parts))
+	resultOut := make(map[string]T, len(parts))
 	for _, v := range parts {
 		kv := strings.Split(v, sepKV)
 		if len(kv) != 2 {
-			return nil, errors.New("invalid string format, should be 'key" + sepKV + "val" + sep + "key" + sepKV + "val'")
+			return errors.New("invalid string format, should be 'key" + sepKV + "val" + sep + "key" + sepKV + "val'")
 		}
-		t, err := uuid.Parse(kv[1])
+		t, err := uuidParse(kv[1])
 		if err != nil {
-			return nil, fmt.Errorf("invalid duration format for key %s: %w", kv[0], err)
+			return fmt.Errorf("invalid uuid format for key %s: %w", kv[0], err)
 		}
-		result[kv[0]] = V(t)
+		resultOut[kv[0]] = T(t)
 	}
+
+	*out = resultOut
+
 	return
 }
 
